@@ -21,7 +21,7 @@ theano.config.dnn.enabled = False
 
 class BaseAdversarialAutoencoder(object):
     def __init__(self, input_shape, encoding_laye=None, decoing_layer=None, disc_layer=None, y_dim=30, z_dim=5,
-                 lam=0.0001, optimizer='adadelta', verbose=0):
+                 lam=0.0001, optimizer='rmsprop', verbose=0):
         self.input_shape = input_shape
         self.encoding_layer = encoding_laye
         self.decoding_layer = decoing_layer
@@ -91,7 +91,7 @@ class BaseAdversarialAutoencoder(object):
 
 class UnsupervisedCluster(BaseAdversarialAutoencoder):
     def __init__(self, input_shape, encoding_layer=None, decoding_layer=None, disc_layer=None, n_clusters=30, z_dim=5,
-                 lam=0.0001, optimizer='adadelta', dropout=0.2, batchnormalization=True, verbose=0, z_sample_func=None):
+                 lam=0.0001, optimizer='rmsprop', dropout=0.2, batchnormalization=True, verbose=0, z_sample_func=None):
         super(UnsupervisedCluster, self).__init__(input_shape, encoding_layer, decoding_layer, disc_layer,
                                                   n_clusters, z_dim, lam, optimizer, verbose)
         self.z_sample_func = z_sample_func if z_sample_func is not None else functools.partial(np.random.normal,
@@ -103,8 +103,6 @@ class UnsupervisedCluster(BaseAdversarialAutoencoder):
 
     def _build_generator(self, dropout=None, batchnormalization=False):
         super(UnsupervisedCluster, self)._build_generator(dropout, batchnormalization)
-        self.generator_y = Model(self.x_in, self.y)
-        self.generator_y.compile(self.optimizer, 'categorical_crossentropy')
         self.generator_z = Model(self.x_in, self.z)
         if 1 == self.verbose:
             print "Generator_y Summary"
@@ -331,8 +329,8 @@ if __name__ == '__main__':
     X_test = X_test.reshape((X_test.shape[0], 784)).astype(theano.config.floatX)
     X_test /= 256.
     advae = SemiSupervisedAdversarialAutoencoder(784, [1000, 1000], [1000, 1000], [1000, 1000], y_dim=10, verbose=0)
-    advae.fit(X_train_unlabeled, X_train_labeled, y_train_labeled, nb_epoch=500)
+    advae.fit(X_train_unlabeled, X_train_labeled, y_train_labeled, nb_epoch=5000)
     advae.plot()
     clusters = UnsupervisedCluster(784, [3000, 3000], [3000, 3000], [3000, 3000], 30, verbose=0)
-    clusters.fit(X_train, nb_epoch=500)
+    clusters.fit(X_train, nb_epoch=1500)
     clusters.plot()
