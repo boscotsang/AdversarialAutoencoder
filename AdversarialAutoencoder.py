@@ -16,9 +16,6 @@ from keras.layers import Dense, Input, merge, BatchNormalization, Dropout, Activ
 from keras.regularizers import l2
 from keras.utils.np_utils import to_categorical
 
-theano.config.dnn.enabled = False
-
-
 class BaseAdversarialAutoencoder(object):
     def __init__(self, input_shape, encoding_laye=None, decoing_layer=None, disc_layer=None, y_dim=30, z_dim=5,
                  lam=0.0001, optimizer='rmsprop', verbose=0):
