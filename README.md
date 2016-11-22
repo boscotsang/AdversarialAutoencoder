@@ -7,5 +7,5 @@ theano
 scikit-learn >= 0.18  
 
 # Usage
-python AdversarialAutoencoder.py
+python AdversarialAutoencoder.py  
 Perform Unsupervised Cluster and Semi-Supervised by adversarial autoencoder.
