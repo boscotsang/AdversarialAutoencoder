@@ -230,7 +230,7 @@ class UnsupervisedCluster(UnsupervisedAdversarialAutoencoder):
                     img, = self.decode([code])
                     img = img.reshape((28, 28))
                     plt.imshow(img)
-            plt.savefig("Cluster{}_epoch{}".format((k + 1, epoch)))
+            plt.savefig("Cluster{}_epoch{}".format(k + 1, epoch))
 
 
 class SemiSupervisedAdversarialAutoencoder(UnsupervisedAdversarialAutoencoder):
@@ -273,6 +273,8 @@ class SemiSupervisedAdversarialAutoencoder(UnsupervisedAdversarialAutoencoder):
         self.z = Dense(self.z_dim, W_regularizer=l2(self.lam))(self.x_e)
         self.latent_code = merge([self.y, self.z], mode='concat', concat_axis=1)
         self.generator = Model(self.x_in, self.latent_code)
+        self.generator_y = Model(self.x_in, self.y)
+        self.generator_y.compile(self.optimizer, 'categorical_crossentropy')
         if 1 == self.verbose:
             print("Generator Summary")
             self.generator.summary()
@@ -447,7 +449,7 @@ class SupervisedAdversarialAutoencoder(BaseAdversarialAutoencoder):
             img, = self.decode([code])
             img = img.reshape((28, 28))
             plt.imshow(img)
-        plt.savefig("Supervised{}_epoch{}".format((i + 1, epoch)))
+        plt.savefig("Supervised{}_epoch{}".format(i + 1, epoch))
 
 
 if __name__ == '__main__':
@@ -465,15 +467,15 @@ if __name__ == '__main__':
     X_test = X_test.astype(theano.config.floatX)
     X_test = X_test.reshape((X_test.shape[0], 784)).astype(theano.config.floatX)
     X_test = X_test / 256.
-    un_advae = UnsupervisedAdversarialAutoencoder(784, [3000, 3000], [3000, 3000], [3000, 3000],
-                                                  z_dim=8, verbose=0, lam=0.0005)
-    semi_advae = SemiSupervisedAdversarialAutoencoder(784, [3000, 3000], [3000, 3000], [3000, 3000],
-                                                      y_dim=10, verbose=0, lam=0.0005)
+    # un_advae = UnsupervisedAdversarialAutoencoder(784, [3000, 3000], [3000, 3000], [3000, 3000],
+    #                                               z_dim=8, verbose=0, lam=0.0005)
+    # semi_advae = SemiSupervisedAdversarialAutoencoder(784, [3000, 3000], [3000, 3000], [3000, 3000],
+    #                                                   y_dim=10, verbose=0, lam=0.0005)
     clusters = UnsupervisedCluster(784, [3000, 3000], [3000, 3000], [3000, 3000], n_clusters=30,
                                    z_dim=8, verbose=0, lam=0.0005)
     sup_advae = SupervisedAdversarialAutoencoder(784, [3000, 3000], [3000, 3000], [3000, 3000],
                                                  n_class=10, verbose=0, lam=0.0005)
-    un_advae.fit(X_train, nb_epoch=100)
-    semi_advae.fit(X_train_unlabeled, X_train_labeled, y_train_labeled, nb_epoch=100)
+    # un_advae.fit(X_train, nb_epoch=100)
+    # semi_advae.fit(X_train_unlabeled, X_train_labeled, y_train_labeled, nb_epoch=100)
     clusters.fit(X_train, nb_epoch=100)
     sup_advae.fit(X_train_labeled, y_train_labeled, nb_epoch=100)
